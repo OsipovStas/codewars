@@ -22,8 +22,19 @@ class KPrimesTest {
     testing(KPrimes.countKPrimes(12, 100000, 100100), "")
     testing(KPrimes.countKPrimes(1, 2, 30), "2, 3, 5, 7, 11, 13, 17, 19, 23, 29")
     testing(KPrimes.countKPrimes(8, 10000000, 10000200), "10000096, 10000152, 10000165, 10000200")
+  }
 
+  @Test
+  def test2(): Unit = {
+    println("Puzzle Tests")
+    testing(KPrimes.puzzle(143).toString, "2")
+    testing(KPrimes.puzzle(138).toString, "1")
+  }
 
+  @Test
+  def that500Is5prime(): Unit = {
+    println("K prime test")
+    testing(KPrimes.isKPrime(500, 5).toString, "true")
   }
 
 }

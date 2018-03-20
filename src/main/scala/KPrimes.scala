@@ -31,7 +31,7 @@ import scala.annotation.tailrec
 
 object KPrimes {
 
-  def nextFactor(n: Long, p: Int): Option[Int] = (2 to math.pow(n, 1.0 / p).toInt) find (x => n % x == 0)
+  def nextFactor(n: Long, p: Int): Option[Int] = (2 to math.pow(n, 1.0 / p).round.toInt) find (x => n % x == 0)
 
   def isPrime(n: Long): Boolean = (2 to math.sqrt(n).toInt) forall (x => n % x != 0)
 
@@ -46,6 +46,12 @@ object KPrimes {
   }
 
   def puzzle(s: Int): Int = {
-    ???
+    val solutions = for {
+      p1 <- (2 to s).filter(isKPrime(_, 1))
+      p3 <- (2 to s).filter(isKPrime(_, 3))
+      p7 <- (2 to s).filter(isKPrime(_, 7))
+      if p1 + p3 + p7 == s
+    } yield (p1,p3,p7)
+    solutions.length
   }
 }
