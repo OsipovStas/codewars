@@ -54,7 +54,7 @@ object Faberge {
     def helper(a: Int, b: Int): BigInt = (a, b) match {
       case (x, y) if x == nn && y == mm =>
         matrix(nn)(mm - 1) + matrix(nn - 1)(mm - 1) + 1
-      case (x, y) if y < mm =>
+      case (x, y) if y < mm - (nn - x) =>
         matrix(x)(y) = matrix(x)(y - 1) + matrix(x - 1)(y - 1) + ONE
         helper(x, y + 1)
       case (x, y) if x < nn =>
