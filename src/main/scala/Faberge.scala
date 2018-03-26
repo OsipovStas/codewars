@@ -1,9 +1,3 @@
-import java.math.BigInteger
-import java.math.BigInteger.ZERO
-import java.math.BigInteger.valueOf
-
-import scala.annotation.tailrec
-
 //One man (lets call him Eulampy) has a collection of some almost identical Fabergè eggs. One day his friend Tempter said to him:
 //
 //  Do you see that skyscraper? And can you tell me a maximal floor that if you drop your egg from will not crack it?
@@ -39,29 +33,43 @@ import scala.annotation.tailrec
 //n <= 20000
 //m <= 20000
 
-
-
+import java.math.BigInteger
+import scala.annotation.tailrec
 
 object Faberge {
   def height(n: BigInteger, m: BigInteger): BigInteger = {
     val nn = n.intValue()
     val mm = m.intValue()
-    val ZERO = BigInt(0)
-    val ONE = BigInt(1)
-    val matrix = Array.fill[BigInt](nn + 1, mm + 1)(ZERO)
+    val _0 = BigInt(0)
+    val _1 = BigInt(1)
+    val _2 = BigInt(2)
+    val values = Array.ofDim[BigInt](nn + 1, mm + 1)
+
+    @inline
+    def update(i: Int, j: Int, v: BigInt): Unit = values(i)(j) = v
+
+    @inline
+    def isCalculated(i: Int, j: Int): Boolean = values(i)(j) != null
 
     @tailrec
-    def helper(a: Int, b: Int): BigInt = (a, b) match {
-      case (x, y) if x == nn && y == mm =>
-        matrix(nn)(mm - 1) + matrix(nn - 1)(mm - 1) + 1
-      case (x, y) if y < mm - (nn - x) =>
-        matrix(x)(y) = matrix(x)(y - 1) + matrix(x - 1)(y - 1) + ONE
-        helper(x, y + 1)
-      case (x, y) if x < nn =>
-        matrix(x)(y) = matrix(x)(y - 1) + matrix(x - 1)(y - 1) + ONE
-        helper(x + 1, 1)
+    def run(calculations: List[(Int, Int)]): Unit = calculations match {
+      case Nil => ()
+      case (i, j) :: xs if isCalculated(i, j) =>
+        run(xs)
+      case (1, j) :: xs =>
+        update(1, j, j)
+        run(xs)
+      case (i, j) :: xs if i >= j =>
+        update(i, j, _2.pow(j) - _1)
+        run(xs)
+      case (i, j) :: _ if !isCalculated(i - 1, j - 1) || !isCalculated(i, j - 1) =>
+        run((i - 1, j - 1) :: (i, j - 1) :: calculations)
+      case (i, j) :: xs =>
+        update(i, j, values(i - 1)(j - 1) + values(i)(j - 1) + _1)
+        run(xs)
     }
 
-    helper(1, 1).bigInteger
+    run((nn, mm) :: Nil)
+    values(nn)(mm).bigInteger
   }
 }
