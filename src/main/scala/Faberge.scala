@@ -37,28 +37,39 @@ import java.math.BigInteger
 import scala.annotation.tailrec
 
 object Faberge {
-  def height(n: BigInteger, m: BigInteger): BigInteger = {
-    val nn = n.intValue()
-    val mm = m.intValue()
-    val _1 = BigInt(1)
-    val _2 = BigInt(2)
+  val _1 = BigInt(1)
+  val _2 = BigInt(2)
 
+  def combination(n: Int, k: Int): BigInt = {
     @tailrec
-    def helper(calculations: List[(Int, Int)], values: Map[(Int, Int), BigInt]): Map[(Int, Int), BigInt] = calculations match {
-      case Nil =>
-        values
-      case (i, j) :: xs if values.contains((i, j)) =>
-        helper(xs, values)
-      case (1, j) :: xs =>
-        helper(xs, values + ((1, j) -> j))
-      case (i, j) :: xs if i >= j =>
-        helper(xs, values + ((i, j) -> (_2.pow(j) - _1)))
-      case (i, j) :: _ if !values.contains((i - 1, j - 1)) || !values.contains((i, j - 1)) =>
-        helper((i - 1, j - 1) :: (i, j - 1) :: calculations, values)
-      case (i, j) :: xs =>
-        helper(xs, values + ((i,j) -> (values((i - 1, j - 1)) + values((i, j - 1)) + _1)))
+    def helper(i: Int, cur: BigInt): BigInt = i match {
+      case _ if i == k => cur
+      case _ => helper(i + 1, (cur * (n - i)) / (i + _1))
     }
-
-    helper((nn, mm) :: Nil, Map())(nn, mm).bigInteger
+    helper(0, 1)
   }
+
+  def combinations(n: Int, m: Int): List[BigInt] = {
+    @tailrec
+    def helper(i: Int, acc: List[BigInt]): List[BigInt] =  i match {
+      case _ if i == 0 => (acc.head * (m - i - 1)) / (n - i) :: acc
+      case _ => helper(i - 1, (acc.head * (m - i - 1)) / (n - i) :: acc)
+    }
+    helper(n - 1, _1 :: Nil)
+  }
+
+  def height(n: BigInteger, m: BigInteger): BigInteger = {
+    ((n.intValue(), m.intValue()) match {
+      case (1, j) =>
+        BigInt(j)
+      case (i, j) if i >= j =>
+        _2.pow(j) - _1
+      case (i, j) =>
+        val cnk = combinations(i, j)
+        val psi = cnk.slice(1, i).sum
+        val ksi = cnk.zipWithIndex.drop(2).map(t => (_2.pow(t._2) - _2) * t._1).sum
+        combination(j, i) + psi + ksi
+    }).bigInteger
+  }
+
 }
