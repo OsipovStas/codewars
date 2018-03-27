@@ -40,36 +40,25 @@ object Faberge {
   def height(n: BigInteger, m: BigInteger): BigInteger = {
     val nn = n.intValue()
     val mm = m.intValue()
-    val _0 = BigInt(0)
     val _1 = BigInt(1)
     val _2 = BigInt(2)
-    val values = Array.ofDim[BigInt](nn + 1, mm + 1)
-
-    @inline
-    def update(i: Int, j: Int, v: BigInt): Unit = values(i)(j) = v
-
-    @inline
-    def isCalculated(i: Int, j: Int): Boolean = values(i)(j) != null
 
     @tailrec
-    def run(calculations: List[(Int, Int)]): Unit = calculations match {
-      case Nil => ()
-      case (i, j) :: xs if isCalculated(i, j) =>
-        run(xs)
+    def helper(calculations: List[(Int, Int)], values: Map[(Int, Int), BigInt]): Map[(Int, Int), BigInt] = calculations match {
+      case Nil =>
+        values
+      case (i, j) :: xs if values.contains((i, j)) =>
+        helper(xs, values)
       case (1, j) :: xs =>
-        update(1, j, j)
-        run(xs)
+        helper(xs, values + ((1, j) -> j))
       case (i, j) :: xs if i >= j =>
-        update(i, j, _2.pow(j) - _1)
-        run(xs)
-      case (i, j) :: _ if !isCalculated(i - 1, j - 1) || !isCalculated(i, j - 1) =>
-        run((i - 1, j - 1) :: (i, j - 1) :: calculations)
+        helper(xs, values + ((i, j) -> (_2.pow(j) - _1)))
+      case (i, j) :: _ if !values.contains((i - 1, j - 1)) || !values.contains((i, j - 1)) =>
+        helper((i - 1, j - 1) :: (i, j - 1) :: calculations, values)
       case (i, j) :: xs =>
-        update(i, j, values(i - 1)(j - 1) + values(i)(j - 1) + _1)
-        run(xs)
+        helper(xs, values + ((i,j) -> (values((i - 1, j - 1)) + values((i, j - 1)) + _1)))
     }
 
-    run((nn, mm) :: Nil)
-    values(nn)(mm).bigInteger
+    helper((nn, mm) :: Nil, Map())(nn, mm).bigInteger
   }
 }
